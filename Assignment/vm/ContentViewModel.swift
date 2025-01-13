@@ -20,7 +20,9 @@ class ContentViewModel : ObservableObject {
 
     func fetchAPI() {
         apiService.fetchDeviceDetails(completion: { item in
-            self.data = item
+            DispatchQueue.main.async {
+                self.data = item
+            }
         })
     }
     

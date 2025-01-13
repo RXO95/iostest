@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    private var viewModel = ContentViewModel()
+    @ObservedObject private var viewModel = ContentViewModel()
     @State private var path: [DeviceData] = [] // Navigation path
 
     var body: some View {
