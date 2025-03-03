@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import RealmSwift
 
 
 class ContentViewModel : ObservableObject {
@@ -29,13 +30,18 @@ class ContentViewModel : ObservableObject {
             }
         })
     }
-    
-    func navigateToDetail(navigateDetail: DeviceData) {
-        self.navigateDetail = navigateDetail
-    }
-    
     func navigateToDetail(navigateDetail: DeviceData, _ path: inout [DeviceData]) {
         path.append(navigateDetail)
-//        self.navigateDetail = navigateDetail
+    }
+    
+    func searchData(_ searchText: String) {
+        if(searchText.isEmpty) {
+            self.fetchAPI()
+        }else{
+            let realm = Realm.cache
+            self.data = realm.objects(DeviceData.self).filter { data in
+                data.name.lowercased().contains(searchText.lowercased())
+            }
+        }
     }
 }
