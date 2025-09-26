@@ -7,26 +7,42 @@
 
 import Foundation
 
-class ApiService : NSObject {
-    private let baseUrl = ""
-    
-    private let sourcesURL = URL(string: "https://api.restful-api.dev/objects")!
+class ApiService{
+    private let baseUrl = "https://api.restful-api.dev/objects"
     
     func fetchDeviceDetails(completion : @escaping ([DeviceData]) -> ()){
+        guard let sourcesURL = URL(string: baseUrl) else{
+            print("Error")
+            completion([])
+            return
+        }
+        
         URLSession.shared.dataTask(with: sourcesURL) { (data, urlResponse, error) in
             if let error = error {
                 print("Network error: \(error.localizedDescription)")
-                completion([]) // Return an empty array on network failure
+                DispatchQueue.main.async {
+                    completion([]) // Return an empty array on network failure
+                }
                 return
             }
             
-            if let data = data {
-                let jsonDecoder = JSONDecoder()
-                let empData = try! jsonDecoder.decode([DeviceData].self, from: data)
-                if (empData.isEmpty) {
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    completion([])
+                }
+                return
+            }
+            
+            do {
+                let empData = try JSONDecoder().decode([DeviceData].self, from: data)
+                DispatchQueue.main.async {
+                    completion(empData)
+                }
+            } catch {
+                print("Decoding error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
                     completion([])
                 }
             }
         }.resume()
-    }
-}
+    }}

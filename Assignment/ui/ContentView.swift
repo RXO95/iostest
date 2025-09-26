@@ -8,34 +8,37 @@
 import SwiftUI
 
 struct ContentView: View {
-    private var viewModel = ContentViewModel()
+    @State private var viewModel = ContentViewModel()
     @State private var path: [DeviceData] = [] // Navigation path
 
     var body: some View {
         NavigationStack(path: $path) {
             Group {
                 if let computers = viewModel.data, !computers.isEmpty {
-                    DevicesList(devices: computers) { selectedComputer in
-                        viewModel.navigateToDetail(navigateDetail: selectedComputer)
-                    }
+                                    DevicesList(devices: computers) { selectedComputer in
+                                        path.append(selectedComputer)
+                                    }
                 } else {
                     ProgressView("Loading...")
+                    
                 }
             }
             .onChange(of: viewModel.navigateDetail, {
                 let navigate = viewModel.navigateDetail
-                path.append(navigate!)
-            })
+                    path.append(navigate!)
+                })
             .navigationTitle("Devices")
-            .navigationDestination(for: DeviceData.self) { computer in
-                DetailView(device: computer)
+            .navigationDestination(for: DeviceData.self) { computers in
+                DetailView(device: computers)
             }
             .onAppear {
-                let navigate = viewModel.navigateDetail
-                if (navigate != nil) {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        path.append(navigate!)
-                    }
+                if viewModel.data?.isEmpty ?? true {
+                                    viewModel.fetchAPI()
+                                }
+                    .navigationTitle("Devices")
+                                .navigationDestination(for: DeviceData.self) { computer in
+                                    DetailView(device: computer)
+                                }
                 }
             }
         }
